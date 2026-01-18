@@ -9,31 +9,23 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/saschakiefer/cf-log-pretty/internal/filter"
 	"github.com/saschakiefer/cf-log-pretty/internal/formatter"
 	"github.com/saschakiefer/cf-log-pretty/internal/parser"
 	"github.com/spf13/cobra"
 )
 
+var levelFlag string
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "cf-log-pretty",
-	Short: "Convert SAP BTP Cloud Foundry logs to human readable format",
-	Long:  `Convert SAP BTP Cloud Foundry logs to human readable format`,
-	Run: func(cmd *cobra.Command, args []string) {
-		scanner := bufio.NewScanner(os.Stdin)
-
-		for scanner.Scan() {
-			line := scanner.Text()
-
-			msg, ok := parser.ParseLine(line)
-			if !ok {
-				continue // skip malformed lines
-			}
-
-			fmt.Println(formatter.Format(msg, formatter.LevelColorizer(msg.Level)))
-		}
-	},
+	Use:     "cf-log-pretty",
+	Short:   "Convert SAP BTP Cloud Foundry logs to human readable format",
+	Long:    `Convert SAP BTP Cloud Foundry logs to human readable format`,
+	PreRunE: validateFlags,
+	Run:     run,
 }
 
 func Execute() {
@@ -44,5 +36,43 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringP("level", "l", "DEBUG", "Help message for toggle")
+	rootCmd.Flags().StringVarP(&levelFlag, "level", "l", "DEBUG", "Minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR)")
+}
+
+func validateFlags(cmd *cobra.Command, args []string) error {
+	level := strings.ToUpper(levelFlag)
+
+	allowed := map[string]bool{
+		"TRACE": true,
+		"DEBUG": true,
+		"INFO":  true,
+		"WARN":  true,
+		"ERROR": true,
+	}
+
+	if level != "" && !allowed[level] {
+		return fmt.Errorf("invalid log level: %s (allowed: TRACE, DEBUG, INFO, WARN, ERROR)", levelFlag)
+	}
+	return nil
+}
+
+func run(cmd *cobra.Command, args []string) {
+	f := filter.New(levelFlag, "")
+
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		msg, ok := parser.ParseLine(line)
+		if !ok {
+			continue // skip malformed lines
+		}
+
+		if !f.Matches(msg) {
+			continue
+		}
+
+		fmt.Println(formatter.Format(msg, formatter.LevelColorizer(msg.Level)))
+	}
 }
