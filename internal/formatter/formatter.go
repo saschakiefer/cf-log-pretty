@@ -52,9 +52,19 @@ func shortenMiddle(input string, max int) string {
 }
 
 // NoColor is used for test output or non-terminal pipes
+func NoColor() ColorFunc {
+	return func(format string, a ...interface{}) string {
+		return fmt.Sprintf(format, a...)
+	}
+}
+
+// Alternative - Not sure yet, which is better
+// equivalent to `var NoColor ColorFunc = func(format string, a ...interface{}) string {`
+/*
 var NoColor = func(format string, a ...interface{}) string {
 	return fmt.Sprintf(format, a...)
 }
+*/
 
 // LevelColorizer returns a color formatting function for the given log level
 func LevelColorizer(level string) ColorFunc {
@@ -68,6 +78,6 @@ func LevelColorizer(level string) ColorFunc {
 	case "DEBUG":
 		return color.New(color.FgHiBlack).Add(color.Bold).SprintfFunc()
 	default:
-		return NoColor
+		return NoColor()
 	}
 }
