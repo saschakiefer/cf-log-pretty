@@ -19,7 +19,7 @@ import (
 
 var levelFlag string
 var excludeLogger []string
-var Version = "1.0.0"
+var Version = "1.0.1"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
