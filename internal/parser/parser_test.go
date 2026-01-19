@@ -29,7 +29,7 @@ func TestParseLine_JSONWithStackTrace(t *testing.T) {
 }
 
 func TestParseLine_JSONWithoutStackTrace(t *testing.T) {
-	input := `   2023-04-30T08:39:16.76+0200 [APP/PROC/WEB/0] OUT { "written_at":"2023-04-30T06:39:16.766Z","level":"INFO","logger":"com.sap.shell.services.navigation.client.ChangeRequestMessageListener","msg":" MQ: Incoming message on topic: cdm/site/entities/deleted" }`
+	input := `   2023-04-30T08:39:16.76+0200 [APP/PROC/WEB/0] OUT { "written_at":"2023-04-30T06:39:16.766Z","level":"INFO","logger":"com.foo.bar","msg":" MQ: Incoming message on topic: cdm/site/entities/deleted" }`
 
 	msg, ok := ParseLine(input)
 	if !ok {
@@ -38,7 +38,7 @@ func TestParseLine_JSONWithoutStackTrace(t *testing.T) {
 	if msg.Level != "INFO" {
 		t.Errorf("Expected level INFO, got %s", msg.Level)
 	}
-	if msg.Logger != "com.sap.shell.services.navigation.client.ChangeRequestMessageListener" {
+	if msg.Logger != "com.foo.bar" {
 		t.Errorf("Unexpected logger: %s", msg.Logger)
 	}
 	if !strings.Contains(msg.Message, "Incoming message") {
@@ -65,13 +65,13 @@ func TestParseLine_PlainServiceMessage(t *testing.T) {
 }
 
 func TestParseLine_RouterAccessLog(t *testing.T) {
-	input := `   2024-01-20T09:37:58.99+0100 [RTR/6] OUT portal-service.cfapps.eu12.hana.ondemand.com - [2024-01-20T08:37:58.990006873Z] "GET /navigation HTTP/1.1" 200`
+	input := `   2024-01-20T09:37:58.99+0100 [RTR/6] OUT test.eu10.hana.ondemand.com - [2024-01-20T08:37:58.990006873Z] "GET /route HTTP/1.1" 200`
 
 	msg, ok := ParseLine(input)
 	if !ok {
 		t.Fatal("Expected RTR log to be parsed")
 	}
-	if !strings.Contains(msg.Message, `"GET /navigation`) {
+	if !strings.Contains(msg.Message, `"GET /route`) {
 		t.Errorf("Unexpected message: %s", msg.Message)
 	}
 }
