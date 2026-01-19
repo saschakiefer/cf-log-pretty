@@ -19,11 +19,13 @@ import (
 
 var levelFlag string
 var excludeLogger []string
+var Version = "1.0.0"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "cf-log-pretty",
-	Short: "Convert SAP BTP Cloud Foundry logs to human readable format",
+	Use:     "cf-log-pretty",
+	Version: Version,
+	Short:   "Convert SAP BTP Cloud Foundry logs to human readable format",
 	Long: `cf-log-pretty is a command-line tool designed to format and colorize log output 
 from SAP BTP Cloud Foundry. It parses the standard Cloud Foundry log format, 
 including structured JSON logs, making them easier to read in a terminal.
