@@ -18,6 +18,7 @@ import (
 )
 
 var levelFlag string
+var excludeLogger []string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -36,7 +37,8 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&levelFlag, "level", "l", "DEBUG", "Minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR)")
+	rootCmd.Flags().StringVarP(&levelFlag, "level", "l", "DEBUG", "Minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR).")
+	rootCmd.Flags().StringSliceVarP(&excludeLogger, "exclude-logger", "e", []string{}, "Exclude logs from given loggers (example: -e \"com.foo.l1,com.foo.l2\"")
 }
 
 func validateFlags(cmd *cobra.Command, args []string) error {
@@ -57,7 +59,7 @@ func validateFlags(cmd *cobra.Command, args []string) error {
 }
 
 func run(cmd *cobra.Command, args []string) {
-	f := filter.New(levelFlag, "")
+	f := filter.New(levelFlag, excludeLogger)
 
 	scanner := bufio.NewScanner(os.Stdin)
 

@@ -49,7 +49,7 @@ func TestFilter_Matches_LevelPriority(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := New(tt.filterLevel, "")
+			f := New(tt.filterLevel, []string{""})
 			m := msg(tt.messageLevel, "com.sap.test")
 
 			got := f.Matches(m)
@@ -63,14 +63,14 @@ func TestFilter_Matches_LevelPriority(t *testing.T) {
 func TestFilter_Matches_LoggerFilter(t *testing.T) {
 	tests := []struct {
 		name          string
-		filterLogger  string
+		filterLogger  []string
 		messageLogger string
 		expectMatch   bool
 	}{
-		{"Match exact logger", "auth", "auth", true},
-		{"Match substring", "auth", "com.sap.auth.Service", true},
-		{"No match", "audit", "com.sap.auth.Service", false},
-		{"Empty logger filter matches everything", "", "anything.at.all", true},
+		{"Match exact logger", []string{"auth"}, "auth", false},
+		{"Match substring", []string{"auth"}, "com.foo.auth.Service", true},
+		{"No match", []string{"audit"}, "com.foo.auth.Service", true},
+		{"Empty logger filter matches everything", []string{}, "anything.at.all", true},
 	}
 
 	for _, tt := range tests {

@@ -6,6 +6,7 @@
 package filter
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/saschakiefer/cf-log-pretty/internal/parser"
@@ -21,18 +22,19 @@ var LevelPriority = map[string]int{
 }
 
 type Filter struct {
-	Level  string
-	Logger string
+	Level         string
+	ExcludeLogger []string
 }
 
-func New(level, logger string) *Filter {
+func New(level string, exclude []string) *Filter {
 	return &Filter{
-		Level:  strings.ToUpper(level),
-		Logger: logger,
+		Level:         strings.ToUpper(level),
+		ExcludeLogger: exclude,
 	}
 }
 
 func (f *Filter) Matches(msg *parser.LogMessage) bool {
+	// Log Level
 	msgLevel := strings.ToUpper(msg.Level)
 
 	logPrio, okLog := LevelPriority[msgLevel]
@@ -51,7 +53,8 @@ func (f *Filter) Matches(msg *parser.LogMessage) bool {
 		return false
 	}
 
-	if f.Logger != "" && !strings.Contains(msg.Logger, f.Logger) {
+	// Exclude Logger
+	if len(f.ExcludeLogger) > 0 && slices.Contains(f.ExcludeLogger, msg.Logger) {
 		return false
 	}
 
