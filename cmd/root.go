@@ -22,9 +22,16 @@ var excludeLogger []string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     "cf-log-pretty",
-	Short:   "Convert SAP BTP Cloud Foundry logs to human readable format",
-	Long:    `Convert SAP BTP Cloud Foundry logs to human readable format`,
+	Use:   "cf-log-pretty",
+	Short: "Convert SAP BTP Cloud Foundry logs to human readable format",
+	Long: `cf-log-pretty is a command-line tool designed to format and colorize log output 
+from SAP BTP Cloud Foundry. It parses the standard Cloud Foundry log format, 
+including structured JSON logs, making them easier to read in a terminal.
+
+It reads from standard input (stdin), allowing you to pipe the output 
+of 'cf logs' directly into it:
+
+    cf logs <app-name> | cf-log-pretty`,
 	PreRunE: validateFlags,
 	Run:     run,
 }
@@ -37,8 +44,8 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&levelFlag, "level", "l", "DEBUG", "Minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR).")
-	rootCmd.Flags().StringSliceVarP(&excludeLogger, "exclude-logger", "e", []string{}, "Exclude logs from given loggers (example: -e \"com.foo.l1,com.foo.l2\"")
+	rootCmd.Flags().StringVarP(&levelFlag, "level", "l", "DEBUG", "minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR)")
+	rootCmd.Flags().StringSliceVarP(&excludeLogger, "exclude-logger", "e", []string{}, "exclude logs from given loggers (e.g. -e \"com.foo,com.bar\")")
 }
 
 func validateFlags(cmd *cobra.Command, args []string) error {
