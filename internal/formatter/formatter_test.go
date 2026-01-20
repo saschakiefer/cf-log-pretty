@@ -25,7 +25,7 @@ func TestFormat_NoColor(t *testing.T) {
 	}
 
 	//output := Format(msg, NoColor)
-	output := Format(msg, LevelColorizer(msg.Level))
+	output := Format(msg, LevelColorizer(msg.Level), false)
 
 	// Basic assertions
 	if !strings.Contains(output, "[ERROR]") {
@@ -48,5 +48,23 @@ func TestFormat_NoColor(t *testing.T) {
 	lines := strings.Split(output, "\n")
 	if len(lines) != 3 {
 		t.Errorf("Expected 3 lines (main + 2 stacktrace), got %d", len(lines))
+	}
+}
+
+func TestFormatTruncation_NoColor(t *testing.T) {
+	msg := &parser.LogMessage{
+		Timestamp:     "2024-01-01T12:00:00.00",
+		Level:         "ERROR",
+		Logger:        "com.example.service.MyLogger",
+		Message:       "Eum nesciunt consequatur.",
+		StackTrace:    []string{},
+		HasParseError: true,
+	}
+
+	//output := Format(msg, NoColor)
+	output := Format(msg, LevelColorizer(msg.Level), true)
+
+	if len(output) != 80 {
+		t.Errorf("Expected output length of 80 characters, got: %d: %s", len(output), output)
 	}
 }

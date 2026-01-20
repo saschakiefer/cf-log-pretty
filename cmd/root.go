@@ -19,7 +19,8 @@ import (
 
 var levelFlag string
 var excludeLogger []string
-var Version = "1.0.1"
+var truncateRaw bool
+var Version = "1.0.2"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -48,6 +49,7 @@ func Execute() {
 func init() {
 	rootCmd.Flags().StringVarP(&levelFlag, "level", "l", "DEBUG", "minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR)")
 	rootCmd.Flags().StringSliceVarP(&excludeLogger, "exclude-logger", "e", []string{}, "exclude logs from given loggers (e.g. -e \"com.foo,com.bar\")")
+	rootCmd.Flags().BoolVarP(&truncateRaw, "truncate-raw", "t", false, "truncate raw log messages to terminal width (if message is not in JSON format, e.g. platform logs)")
 }
 
 func validateFlags(cmd *cobra.Command, args []string) error {
@@ -84,6 +86,6 @@ func run(cmd *cobra.Command, args []string) {
 			continue
 		}
 
-		fmt.Println(formatter.Format(msg, formatter.LevelColorizer(msg.Level)))
+		fmt.Println(formatter.Format(msg, formatter.LevelColorizer(msg.Level), truncateRaw))
 	}
 }

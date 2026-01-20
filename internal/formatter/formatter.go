@@ -10,20 +10,26 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/saschakiefer/cf-log-pretty/internal/parser"
+	"github.com/saschakiefer/cf-log-pretty/internal/util"
 )
 
 // ColorFunc defines a flexible formatting function (with or without ANSI colors)
 type ColorFunc func(format string, a ...interface{}) string
 
 // Format renders a log message using the provided level color function
-func Format(msg *parser.LogMessage, colorizeLevel ColorFunc) string {
+func Format(msg *parser.LogMessage, colorizeLevel ColorFunc, truncateRaw bool) string {
 	levelText := colorizeLevel("[%-5s]", msg.Level)
+
+	message := msg.Message
+	if msg.HasParseError && truncateRaw {
+		message = truncToTerminal(message, 74)
+	}
 
 	result := fmt.Sprintf("%-22s %s %-40s : %s",
 		msg.Timestamp,
 		levelText,
 		shortenMiddle(msg.Logger, 40),
-		msg.Message,
+		message,
 	)
 
 	if len(msg.StackTrace) > 0 {
@@ -49,6 +55,19 @@ func shortenMiddle(input string, max int) string {
 	end := input[len(input)-(max-len(dots)-keep):]
 
 	return start + dots + end
+}
+
+func truncToTerminal(input string, offset int) string {
+	maxLen := util.GetTerminalWidth() - offset
+	if maxLen <= 0 {
+		return ""
+	}
+
+	if len(input) <= maxLen {
+		return input
+	}
+
+	return input[:maxLen-3] + "..."
 }
 
 // NoColor is used for test output or non-terminal pipes

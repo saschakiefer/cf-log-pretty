@@ -12,14 +12,15 @@ import (
 )
 
 type LogMessage struct {
-	Timestamp  string
-	Source     string
-	Direction  string
-	Level      string
-	Logger     string
-	Message    string
-	StackTrace []string
-	Raw        string
+	Timestamp     string
+	Source        string
+	Direction     string
+	Level         string
+	Logger        string
+	Message       string
+	StackTrace    []string
+	Raw           string
+	HasParseError bool
 }
 
 var cfPrefixRegex = regexp.MustCompile(`^\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{2,})\+\d{4}\s+\[([^]]+)]\s+(OUT|ERR)\s+`)
@@ -47,11 +48,12 @@ func ParseLine(line string) (*LogMessage, bool) {
 	rest := strings.TrimSpace(line[loc[1]:])
 
 	msg := &LogMessage{
-		Timestamp: timestamp,
-		Source:    source,
-		Level:     "-----", // Default will be overwritten if available
-		Direction: direction,
-		Raw:       line,
+		Timestamp:     timestamp,
+		Source:        source,
+		Level:         "-----", // Default will be overwritten if available
+		Direction:     direction,
+		Raw:           line,
+		HasParseError: false,
 	}
 
 	// Try to parse the remaining content as JSON
@@ -64,6 +66,7 @@ func ParseLine(line string) (*LogMessage, bool) {
 	err := decoder.Decode(&structured)
 	if err != nil {
 		// Not a valid JSON log, fallback to plain message
+		msg.HasParseError = true
 		msg.Message = rest
 		return msg, true
 	}

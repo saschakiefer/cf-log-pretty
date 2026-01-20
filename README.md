@@ -8,6 +8,7 @@
 - **Colorized output**: Highlights log levels (INFO, WARN, ERROR, etc.) for better visibility.
 - **Filtering**: Filter logs by minimum log level.
 - **Exclusion**: Exclude specific loggers from the output.
+- **Truncation**: Truncate raw log messages to terminal width.
 
 ## Requirements
 
@@ -42,9 +43,10 @@ cf logs <app-name> | cf-log-pretty
 
 ```text
 Flags:
-  -e, --exclude-logger strings   Exclude logs from given loggers (example: -e "com.foo.l1,com.foo.l2")
+  -e, --exclude-logger strings   exclude logs from given loggers (example: -e "com.foo.l1,com.foo.l2")
   -h, --help                     help for cf-log-pretty
-  -l, --level string             Minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR). (default "DEBUG")
+  -l, --level string             minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR). (default "DEBUG")
+  -t, --truncate-raw             truncate raw log messages to terminal width (if message is not in JSON format, e.g. platform logs)
 ```
 
 ### Example
@@ -59,6 +61,12 @@ Exclude specific loggers:
 
 ```bash
 cf logs my-app | cf-log-pretty --exclude-logger "com.sap.cloud.sdk,org.springframework"
+```
+
+Truncate raw log messages (e.g. for platform logs):
+
+```bash
+cf logs my-app | cf-log-pretty --truncate-raw
 ```
 
 ## Project Structure
