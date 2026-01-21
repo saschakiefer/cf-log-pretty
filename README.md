@@ -43,10 +43,11 @@ cf logs <app-name> | cf-log-pretty
 
 ```text
 Flags:
-  -e, --exclude-logger strings   exclude logs from given loggers (example: -e "com.foo.l1,com.foo.l2")
-  -h, --help                     help for cf-log-pretty
-  -l, --level string             minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR). (default "DEBUG")
-  -t, --truncate-raw             truncate raw log messages to terminal width (if message is not in JSON format, e.g. platform logs)
+  -e, --exclude-logger strings      exclude logs from given loggers. Supports exact match (e.g. "com.foo.Service") or package wildcard (e.g. "com.foo.core.*" for packages and sub-packages)
+  -h, --help                        help for cf-log-pretty
+  -l, --level string                minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR). (default "DEBUG")
+  -r, --remove-logger-prefix string  remove given prefix from logger names (e.g. "com.foo.prod.")
+  -t, --truncate-raw                truncate raw log messages to terminal width (if message is not in JSON format, e.g. platform logs)
 ```
 
 ### Example
@@ -61,6 +62,12 @@ Exclude specific loggers:
 
 ```bash
 cf logs my-app | cf-log-pretty --exclude-logger "com.sap.cloud.sdk,org.springframework"
+```
+
+Remove logger prefix to shorten logger names:
+
+```bash
+cf logs my-app | cf-log-pretty --remove-logger-prefix "com.mycompany.prod."
 ```
 
 Truncate raw log messages (e.g. for platform logs):
