@@ -51,7 +51,7 @@ func TestFormat_NoColor(t *testing.T) {
 	}
 }
 
-func TestFormatTruncation_NoColor(t *testing.T) {
+func TestFormatRawTruncation_NoColor(t *testing.T) {
 	msg := &parser.LogMessage{
 		Timestamp:     "2024-01-01T12:00:00.00",
 		Level:         "ERROR",
@@ -66,5 +66,31 @@ func TestFormatTruncation_NoColor(t *testing.T) {
 
 	if len(output) != 80 {
 		t.Errorf("Expected output length of 80 characters, got: %d: %s", len(output), output)
+	}
+
+	if !strings.HasSuffix(output, "...") {
+		t.Errorf("Expected output to end with '...', got: %s", output)
+	}
+}
+
+func TestFormatRawNoTruncation_NoColor(t *testing.T) {
+	msg := &parser.LogMessage{
+		Timestamp:     "2024-01-01T12:00:00.00",
+		Level:         "ERROR",
+		Logger:        "com.example.service.MyLogger",
+		Message:       "Eum ne",
+		StackTrace:    []string{},
+		HasParseError: true,
+	}
+
+	//output := Format(msg, NoColor)
+	output := Format(msg, LevelColorizer(msg.Level), true)
+
+	if len(output) != 80 {
+		t.Errorf("Expected output length of 80 characters, got: %d: %s", len(output), output)
+	}
+
+	if !strings.HasSuffix(output, "Eum ne") {
+		t.Errorf("Expected output to end with 'Eum ne' (no truncation), got: %s", output)
 	}
 }
