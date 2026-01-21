@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/saschakiefer/cf-log-pretty/internal/config"
 	"github.com/saschakiefer/cf-log-pretty/internal/parser"
 )
 
@@ -25,7 +26,7 @@ func TestFormat_NoColor(t *testing.T) {
 	}
 
 	//output := Format(msg, NoColor)
-	output := Format(msg, LevelColorizer(msg.Level), false)
+	output := Format(msg, LevelColorizer(msg.Level), &config.Config{TruncateRaw: false})
 
 	// Basic assertions
 	if !strings.Contains(output, "[ERROR]") {
@@ -62,7 +63,7 @@ func TestFormatRawTruncation_NoColor(t *testing.T) {
 	}
 
 	//output := Format(msg, NoColor)
-	output := Format(msg, LevelColorizer(msg.Level), true)
+	output := Format(msg, LevelColorizer(msg.Level), &config.Config{TruncateRaw: true})
 
 	if len(output) != 80 {
 		t.Errorf("Expected output length of 80 characters, got: %d: %s", len(output), output)
@@ -84,7 +85,7 @@ func TestFormatRawNoTruncation_NoColor(t *testing.T) {
 	}
 
 	//output := Format(msg, NoColor)
-	output := Format(msg, LevelColorizer(msg.Level), true)
+	output := Format(msg, LevelColorizer(msg.Level), &config.Config{TruncateRaw: true})
 
 	if len(output) != 80 {
 		t.Errorf("Expected output length of 80 characters, got: %d: %s", len(output), output)
