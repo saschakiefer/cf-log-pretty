@@ -8,6 +8,7 @@ package filter
 import (
 	"testing"
 
+	"github.com/saschakiefer/cf-log-pretty/internal/config"
 	"github.com/saschakiefer/cf-log-pretty/internal/parser"
 )
 
@@ -49,7 +50,7 @@ func TestFilter_Matches_LevelPriority(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := New(tt.filterLevel, []string{""})
+			f := New(&config.Config{Level: tt.filterLevel, Exclude: []string{""}})
 			m := msg(tt.messageLevel, "com.sap.test")
 
 			got := f.Matches(m)
@@ -95,7 +96,7 @@ func TestFilter_Matches_LoggerFilter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := New("DEBUG", tt.filterLogger)
+			f := New(&config.Config{Level: "DEBUG", Exclude: tt.filterLogger})
 			m := msg("INFO", tt.messageLogger)
 
 			got := f.Matches(m)

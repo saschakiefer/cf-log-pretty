@@ -8,6 +8,7 @@ package filter
 import (
 	"strings"
 
+	"github.com/saschakiefer/cf-log-pretty/internal/config"
 	"github.com/saschakiefer/cf-log-pretty/internal/parser"
 )
 
@@ -21,14 +22,14 @@ var LevelPriority = map[string]int{
 }
 
 type Filter struct {
-	Level         string
-	ExcludeLogger []string
+	Level   string
+	Exclude []string
 }
 
-func New(level string, exclude []string) *Filter {
+func New(cfg *config.Config) *Filter {
 	return &Filter{
-		Level:         strings.ToUpper(level),
-		ExcludeLogger: exclude,
+		Level:   strings.ToUpper(cfg.Level),
+		Exclude: cfg.Exclude,
 	}
 }
 
@@ -53,7 +54,7 @@ func (f *Filter) Matches(msg *parser.LogMessage) bool {
 	}
 
 	// Exclude Logger
-	if len(f.ExcludeLogger) > 0 && f.matchesExcludedLogger(msg.Logger) {
+	if len(f.Exclude) > 0 && f.matchesExcludedLogger(msg.Logger) {
 		return false
 	}
 
@@ -64,7 +65,7 @@ func (f *Filter) Matches(msg *parser.LogMessage) bool {
 // Patterns ending with "*" are treated as package prefixes (e.g., "com.foo.core.*" matches "com.foo.core.Service").
 // Patterns without "*" must match exactly.
 func (f *Filter) matchesExcludedLogger(logger string) bool {
-	for _, pattern := range f.ExcludeLogger {
+	for _, pattern := range f.Exclude {
 		if strings.HasSuffix(pattern, "*") {
 			// Package prefix matching
 			prefix := strings.TrimSuffix(pattern, "*")
