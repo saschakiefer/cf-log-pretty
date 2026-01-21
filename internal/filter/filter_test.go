@@ -67,10 +67,30 @@ func TestFilter_Matches_LoggerFilter(t *testing.T) {
 		messageLogger string
 		expectMatch   bool
 	}{
-		{"Match exact logger", []string{"auth"}, "auth", false},
-		{"Match substring", []string{"auth"}, "com.foo.auth.Service", true},
-		{"No match", []string{"audit"}, "com.foo.auth.Service", true},
+		// Exact matching (no wildcard)
+		{"Exact match excludes logger", []string{"com.foo.auth.Service"}, "com.foo.auth.Service", false},
+		{"Exact match - no match includes logger", []string{"com.foo.audit"}, "com.foo.auth.Service", true},
+		{"Exact match - partial name no match", []string{"auth"}, "com.foo.auth.Service", true},
+
+		// Package prefix matching (with wildcard)
+		{"Package wildcard matches exact package", []string{"com.foo.core.*"}, "com.foo.core.Service", false},
+		{"Package wildcard matches sub-package", []string{"com.foo.core.*"}, "com.foo.core.sub.Service", false},
+		{"Package wildcard no match different package", []string{"com.foo.core.*"}, "com.foo.auth.Service", true},
+		{"Package wildcard matches package root", []string{"com.foo.*"}, "com.foo.Service", false},
+		{"Package wildcard matches nested", []string{"com.foo.*"}, "com.foo.core.sub.Service", false},
+		{"Package wildcard with trailing dot", []string{"com.foo.core.*"}, "com.foo.core.Service", false},
+
+		// Multiple filters
+		{"Multiple filters - first matches", []string{"com.foo.auth.*", "com.bar.*"}, "com.foo.auth.Service", false},
+		{"Multiple filters - second matches", []string{"com.foo.auth.*", "com.bar.*"}, "com.bar.Service", false},
+		{"Multiple filters - no match", []string{"com.foo.auth.*", "com.bar.*"}, "com.baz.Service", true},
+		{"Multiple filters - exact and wildcard", []string{"com.foo.auth.Service", "com.bar.*"}, "com.foo.auth.Service", false},
+		{"Multiple filters - exact and wildcard 2", []string{"com.foo.auth.Service", "com.bar.*"}, "com.bar.test.Service", false},
+
+		// Empty and edge cases
 		{"Empty logger filter matches everything", []string{}, "anything.at.all", true},
+		{"Empty string filter", []string{""}, "com.foo.Service", true},
+		{"Wildcard only", []string{"*"}, "com.foo.Service", false},
 	}
 
 	for _, tt := range tests {

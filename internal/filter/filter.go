@@ -6,7 +6,6 @@
 package filter
 
 import (
-	"slices"
 	"strings"
 
 	"github.com/saschakiefer/cf-log-pretty/internal/parser"
@@ -54,9 +53,30 @@ func (f *Filter) Matches(msg *parser.LogMessage) bool {
 	}
 
 	// Exclude Logger
-	if len(f.ExcludeLogger) > 0 && slices.Contains(f.ExcludeLogger, msg.Logger) {
+	if len(f.ExcludeLogger) > 0 && f.matchesExcludedLogger(msg.Logger) {
 		return false
 	}
 
 	return true
+}
+
+// matchesExcludedLogger checks if the logger name matches any exclude pattern.
+// Patterns ending with "*" are treated as package prefixes (e.g., "com.foo.core.*" matches "com.foo.core.Service").
+// Patterns without "*" must match exactly.
+func (f *Filter) matchesExcludedLogger(logger string) bool {
+	for _, pattern := range f.ExcludeLogger {
+		if strings.HasSuffix(pattern, "*") {
+			// Package prefix matching
+			prefix := strings.TrimSuffix(pattern, "*")
+			if strings.HasPrefix(logger, prefix) {
+				return true
+			}
+		} else {
+			// Exact match
+			if logger == pattern {
+				return true
+			}
+		}
+	}
+	return false
 }
