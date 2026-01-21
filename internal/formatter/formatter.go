@@ -7,8 +7,10 @@ package formatter
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/fatih/color"
+	"github.com/saschakiefer/cf-log-pretty/internal/config"
 	"github.com/saschakiefer/cf-log-pretty/internal/parser"
 	"github.com/saschakiefer/cf-log-pretty/internal/util"
 )
@@ -17,18 +19,24 @@ import (
 type ColorFunc func(format string, a ...interface{}) string
 
 // Format renders a log message using the provided level color function
-func Format(msg *parser.LogMessage, colorizeLevel ColorFunc, truncateRaw bool) string {
+func Format(msg *parser.LogMessage, colorizeLevel ColorFunc, cfg *config.Config) string {
 	levelText := colorizeLevel("[%-5s]", msg.Level)
 
 	message := msg.Message
-	if msg.HasParseError && truncateRaw {
+	if msg.HasParseError && cfg.TruncateRaw {
 		message = truncToTerminal(message, 74)
 	}
+
+	logger := msg.Logger
+	if cfg.RemovePrefix != "" {
+		logger = strings.Replace(logger, cfg.RemovePrefix, "", 1)
+	}
+	logger = shortenMiddle(logger, 40)
 
 	result := fmt.Sprintf("%-22s %s %-40s : %s",
 		msg.Timestamp,
 		levelText,
-		shortenMiddle(msg.Logger, 40),
+		logger,
 		message,
 	)
 

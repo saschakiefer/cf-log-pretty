@@ -49,8 +49,10 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().StringVarP(&cfg.Level, "level", "l", "DEBUG", "minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR)")
+	rootCmd.Flags().StringVarP(&cfg.RemovePrefix, "remove-logger-prefix", "r", "", "remove given prefix from logger names (e.g. \"com.foo.prod.\")")
 	rootCmd.Flags().StringSliceVarP(&cfg.Exclude, "exclude-logger", "e", []string{}, "exclude logs from given loggers. Supports exact match (e.g. \"com.foo.Service\") or package wildcard (e.g. \"com.foo.core.*\" for packages and sub-packages)")
 	rootCmd.Flags().BoolVarP(&cfg.TruncateRaw, "truncate-raw", "t", false, "truncate raw log messages to terminal width (if message is not in JSON format, e.g. platform logs)")
+
 }
 
 func validateFlags(_ *cobra.Command, _ []string) error {
@@ -87,6 +89,6 @@ func run(_ *cobra.Command, _ []string) {
 			continue
 		}
 
-		fmt.Println(formatter.Format(msg, formatter.LevelColorizer(msg.Level), cfg.TruncateRaw))
+		fmt.Println(formatter.Format(msg, formatter.LevelColorizer(msg.Level), cfg))
 	}
 }
