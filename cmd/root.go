@@ -50,12 +50,14 @@ func Execute() {
 func init() {
 	rootCmd.Flags().StringVarP(&cfg.Level, "level", "l", "TRACE", "minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR)")
 	rootCmd.Flags().StringVarP(&cfg.RemovePrefix, "remove-logger-prefix", "r", "", "remove given prefix from logger names (e.g. \"com.foo.prod.\")")
+	rootCmd.Flags().BoolVarP(&cfg.LoggerNameOnly, "show-logger-name-only", "n", false, "remove complete package prefix from logger names")
 	rootCmd.Flags().StringSliceVarP(&cfg.Exclude, "exclude-logger", "e", []string{}, "exclude logs from given loggers. Supports exact match (e.g. \"com.foo.Service\") or package wildcard (e.g. \"com.foo.core.*\" for packages and sub-packages)")
 	rootCmd.Flags().BoolVarP(&cfg.TruncateRaw, "truncate-raw", "t", false, "truncate raw log messages to terminal width (if message is not in JSON format, e.g. platform logs)")
 
 }
 
 func validateFlags(_ *cobra.Command, _ []string) error {
+	// Validate log level
 	level := strings.ToUpper(cfg.Level)
 
 	allowed := map[string]bool{
@@ -69,6 +71,12 @@ func validateFlags(_ *cobra.Command, _ []string) error {
 	if level != "" && !allowed[level] {
 		return fmt.Errorf("invalid log level: %s (allowed: TRACE, DEBUG, INFO, WARN, ERROR)", cfg.Level)
 	}
+
+	// Validate logger display option
+	if cfg.LoggerNameOnly && cfg.RemovePrefix != "" {
+		return fmt.Errorf("cannot use --show-logger-name-only and --remove-logger-prefix together")
+	}
+
 	return nil
 }
 

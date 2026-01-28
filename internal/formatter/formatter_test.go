@@ -95,3 +95,73 @@ func TestFormatRawNoTruncation_NoColor(t *testing.T) {
 		t.Errorf("Expected output to end with 'Eum ne' (no truncation), got: %s", output)
 	}
 }
+
+func TestFormat_LoggerNameOnly(t *testing.T) {
+	msg := &parser.LogMessage{
+		Timestamp:  "2024-01-01T12:00:00.00",
+		Level:      "INFO",
+		Logger:     "com.example.service.MyLogger",
+		Message:    "Test message",
+		StackTrace: []string{},
+	}
+
+	output := Format(msg, LevelColorizer(msg.Level), &config.Config{
+		TruncateRaw:    false,
+		LoggerNameOnly: true,
+	})
+
+	// Should contain only "MyLogger" not the full package path
+	if !strings.Contains(output, "MyLogger") {
+		t.Errorf("Expected 'MyLogger' in output, got: %s", output)
+	}
+
+	// Should NOT contain the package prefix
+	if strings.Contains(output, "com.example.service.MyLogger") {
+		t.Errorf("Expected package prefix to be removed, got: %s", output)
+	}
+
+	// Should still contain the message
+	if !strings.Contains(output, "Test message") {
+		t.Errorf("Expected message in output, got: %s", output)
+	}
+}
+
+func TestFormat_LoggerNameOnlyWithSingleName(t *testing.T) {
+	msg := &parser.LogMessage{
+		Timestamp:  "2024-01-01T12:00:00.00",
+		Level:      "DEBUG",
+		Logger:     "SimpleLogger",
+		Message:    "Debug message",
+		StackTrace: []string{},
+	}
+
+	output := Format(msg, LevelColorizer(msg.Level), &config.Config{
+		TruncateRaw:    false,
+		LoggerNameOnly: true,
+	})
+
+	// Should still work with a logger name that has no package
+	if !strings.Contains(output, "SimpleLogger") {
+		t.Errorf("Expected 'SimpleLogger' in output, got: %s", output)
+	}
+}
+
+func TestFormat_LoggerNameOnlyDisabled(t *testing.T) {
+	msg := &parser.LogMessage{
+		Timestamp:  "2024-01-01T12:00:00.00",
+		Level:      "WARN",
+		Logger:     "com.example.service.MyLogger",
+		Message:    "Warning message",
+		StackTrace: []string{},
+	}
+
+	output := Format(msg, LevelColorizer(msg.Level), &config.Config{
+		TruncateRaw:    false,
+		LoggerNameOnly: false,
+	})
+
+	// Should contain the full logger name when LoggerNameOnly is false
+	if !strings.Contains(output, "com.example.service.MyLogger") {
+		t.Errorf("Expected full logger name in output, got: %s", output)
+	}
+}

@@ -7,8 +7,9 @@ package config
 
 // Config holds the application configuration flags
 type Config struct {
-	Level        string
-	Exclude      []string
-	TruncateRaw  bool
-	RemovePrefix string
+	Level          string
+	Exclude        []string
+	TruncateRaw    bool
+	RemovePrefix   string
+	LoggerNameOnly bool
 }

@@ -20,19 +20,29 @@ type ColorFunc func(format string, a ...interface{}) string
 
 // Format renders a log message using the provided level color function
 func Format(msg *parser.LogMessage, colorizeLevel ColorFunc, cfg *config.Config) string {
+	// Process log level with color
 	levelText := colorizeLevel("[%-5s]", msg.Level)
 
+	// Process message text
 	message := msg.Message
 	if msg.HasParseError && cfg.TruncateRaw {
 		message = truncToTerminal(message, 74)
 	}
 
+	// Process logger name
 	logger := msg.Logger
 	if cfg.RemovePrefix != "" {
 		logger = strings.Replace(logger, cfg.RemovePrefix, "", 1)
 	}
+
+	if cfg.LoggerNameOnly {
+		parts := strings.Split(logger, ".")
+		logger = parts[len(parts)-1]
+	}
+
 	logger = shortenMiddle(logger, 40)
 
+	// Build final output
 	result := fmt.Sprintf("%-22s %s %-40s : %s",
 		msg.Timestamp,
 		levelText,
