@@ -47,6 +47,7 @@ Flags:
   -h, --help                        help for cf-log-pretty
   -l, --level string                minimum log level to include (TRACE, DEBUG, INFO, WARN, ERROR). (default "DEBUG")
   -r, --remove-logger-prefix string  remove given prefix from logger names (e.g. "com.foo.prod.")
+  -n, --show-logger-name-only       remove complete package prefix from logger names
   -t, --truncate-raw                truncate raw log messages to terminal width (if message is not in JSON format, e.g. platform logs)
 ```
 
@@ -68,6 +69,12 @@ Remove logger prefix to shorten logger names:
 
 ```bash
 cf logs my-app | cf-log-pretty --remove-logger-prefix "com.mycompany.prod."
+```
+
+Show only logger names without package paths:
+
+```bash
+cf logs my-app | cf-log-pretty --show-logger-name-only
 ```
 
 Truncate raw log messages (e.g. for platform logs):
